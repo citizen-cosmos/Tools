@@ -40,10 +40,52 @@ read PROMETHEUS
 
 if [ $PROMETHEUS == "y" ]; then
     echo "Installing Prometheus..."
-    # add installation steps for Prometheus here
+    #Downloadind and extracting latest version
+    PROMETHEUS_VERSION=$(curl -s https://api.github.com/repos/prometheus/prometheus/releases/latest | grep tag_name | cut -d '"' -f 4)
+    wget https://github.com/prometheus/prometheus/releases/download/$PROMETHEUS_VERSION/prometheus-$PROMETHEUS_VERSION.linux-amd64.tar.gz
+    tar xzf prometheus-$PROMETHEUS_VERSION.linux-amd64.tar.gz
+    sudo mv prometheus-$PROMETHEUS_VERSION.linux-amd64/prometheus /usr/local/bin/
 
     echo "Configuring Prometheus..."
-    # add configuration steps for Prometheus here
+    # Create the Prometheus user and group
+    sudo groupadd --system prometheus
+    sudo useradd -s /sbin/nologin --system -g prometheus prometheus
+
+    # Create the Prometheus configuration directory and copy the example configuration file
+    sudo mkdir /etc/prometheus
+    sudo cp prometheus-$PROMETHEUS_VERSION.linux-amd64/prometheus.yml /etc/prometheus/
+
+    # Update the ownership and permissions of the Prometheus files
+    sudo chown -R prometheus:prometheus /usr/local/bin/prometheus /etc/prometheus/
+    sudo chmod -R 775 /usr/local/bin/prometheus /etc/prometheus/
+    sudo chmod 755 /usr/local/bin/prometheus
+
+    # Create the Prometheus systemd service file
+    sudo tee /etc/systemd/system/prometheus.service > /dev/null <<EOF
+[Unit]
+Description=Prometheus Monitoring System
+After=network.target
+
+[Service]
+User=prometheus
+Group=prometheus
+Type=simple
+ExecStart=/usr/local/bin/prometheus \
+  --config.file=/etc/prometheus/prometheus.yml \
+  --storage.tsdb.path=/var/lib/prometheus/data \
+  --web.console.templates=/usr/local/bin/prometheus/consoles \
+  --web.console.libraries=/usr/local/bin/prometheus/console_libraries
+  --web.listen-address="0.0.0.0:8090"
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    sudo systemctl daemon-reload
+    sudo systemctl start prometheus
+    sudo systemctl enable prometheus
+
+echo "Prometheus has been installed successfully!"
 fi
 
 echo "Do you want to set up Node Exporter? (y/n):"
@@ -51,10 +93,37 @@ read NODE_EXPORTER
 
 if [ $NODE_EXPORTER == "y" ]; then
     echo "Installing Node Exporter..."
-    # add installation steps for Node Exporter here
+    # Download latest Node Exporter binary
+    wget https://github.com/prometheus/node_exporter/releases/latest/download/node_exporter-$(uname -s)-$(uname -m).tar.gz
+
+    # Extract the binary and move it to /usr/local/bin
+    tar xvfz node_exporter-$(uname -s)-$(uname -m).tar.gz
+    sudo mv node_exporter*/node_exporter /usr/local/bin/
 
     echo "Configuring Node Exporter..."
-    # add configuration steps for Node Exporter here
+    # Create the Node Exporter service file
+    sudo tee /etc/systemd/system/node_exporter.service <<EOF
+[Unit]
+Description=Node Exporter
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=node_exporter
+Group=node_exporter
+Type=simple
+ExecStart=/usr/local/bin/node_exporter
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    sudo systemctl daemon-reload
+    sudo systemctl start node_exporter
+    sudo systemctl enable node_exporter
+
+    # Display the Node Exporter version
+    echo "Node Exporter version: $(/usr/local/bin/node_exporter --version)"
 fi
 
 #installing golang
