@@ -68,6 +68,10 @@ if [ $PROMETHEUS == "y" ]; then
     # Create the Prometheus user and group
     sudo groupadd --system prometheus
     sudo useradd -s /sbin/nologin --system -g prometheus prometheus
+    
+    sudo mkdir -p /var/lib/prometheus/data
+    sudo chown -R prometheus:prometheus /var/lib/prometheus
+
 
     # Create the Prometheus configuration directory and copy the example configuration file
     sudo mkdir /etc/prometheus
@@ -89,11 +93,12 @@ User=prometheus
 Group=prometheus
 Type=simple
 ExecStart=/usr/local/bin/prometheus \
-  --config.file=/etc/prometheus/prometheus.yml \
-  --storage.tsdb.path=/var/lib/prometheus/data \
-  --web.console.templates=/usr/local/bin/prometheus/consoles \
-  --web.console.libraries=/usr/local/bin/prometheus/console_libraries
+  --config.file /etc/prometheus/prometheus.yml \
+  --storage.tsdb.path /var/lib/prometheus/ \
+  --web.console.templates=/etc/prometheus/consoles \
+  --web.console.libraries=/etc/prometheus/console_libraries \
   --web.listen-address="0.0.0.0:8090"
+  ExecReload=/bin/kill -HUP $MAINPID
 
 [Install]
 WantedBy=multi-user.target
@@ -144,23 +149,6 @@ EOF
     echo "Node Exporter version: $(/usr/local/bin/node_exporter --version)"
 fi
 
-#installing golang
-echo "Do you want to install Go? (y/n):" install_go
-read install_go
-
-if [ "$install_go" == "y" ]; then
-    read -p "Which version of Go do you want to install? [e.g., 1.16.3] :" version
-    echo "Installing Go version $version..."
-    sudo wget https://golang.org/dl/go$version.linux-amd64.tar.gz
-    sudo rm -rf /usr/local/go
-    sudo tar -C /usr/local -xzf go$version.linux-amd64.tar.gz
-    rm "go$version.linux-amd64.tar.gz"
-    echo "export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin" >> $HOME/.bash_profile
-    source ~/.bashrc
-fi
-
-echo "Go version installed on this machine: $(go version)"
-
 # Ask whether to change the default SSH port
 read -p "Do you want to change the default SSH port (22)? (y/n): " choice
 
@@ -181,7 +169,7 @@ else
 fi
 
 # Firewall setup
-echo "Do you want to install and setup firewall?:" frwl
+echo "Do you want to install and setup firewall?: (y/n)" 
 read frwl
 
 if [[ $frwl =~ ^[Yy]$ ]]
@@ -216,7 +204,7 @@ else
 fi
 
 # Generate google 2FA
-echo "Do you want to configure google two-factor authentification for created user?:" GFA
+echo "Do you want to configure google two-factor authentification for created user?: (y/n)" 
 read $GFA
 
 if [[ $GFA =~ ^[Yy]$ ]]
@@ -228,3 +216,20 @@ EOF
 else
     echo "Google 2FA setup cancelled."
 fi    
+
+#installing golang
+echo "Do you want to install Go? (y/n):" install_go
+read install_go
+
+if [ "$install_go" == "y" ]; then
+    read -p "Which version of Go do you want to install? [e.g., 1.16.3] :" version
+    echo "Installing Go version $version..."
+    sudo wget https://golang.org/dl/go$version.linux-amd64.tar.gz
+    sudo rm -rf /usr/local/go
+    sudo tar -C /usr/local -xzf go$version.linux-amd64.tar.gz
+    rm "go$version.linux-amd64.tar.gz"
+    echo "export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin" >> $HOME/.bash_profile
+    source ~/.bashrc
+fi
+
+echo "Go version installed on this machine: $(go version)"
