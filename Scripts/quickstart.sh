@@ -215,7 +215,7 @@ if [[ $GFA =~ ^[Yy]$ ]]
 then
     sudo -i -u $USR bash << EOF
 echo "execute as $USR"
-google-authenticator  -t -D -r 3 -R 30 -w 4 -f -C
+google-authenticator  -t -D -r 3 -R 30 -w 4 -f
 EOF
 else
     echo "Google 2FA setup cancelled."
