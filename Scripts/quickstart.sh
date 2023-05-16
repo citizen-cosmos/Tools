@@ -121,11 +121,12 @@ read NODE_EXPORTER
 if [ $NODE_EXPORTER == "y" ]; then
     echo "Installing Node Exporter..."
     # Download latest Node Exporter binary
-    wget https://github.com/prometheus/node_exporter/releases/latest/download/node_exporter-$(uname -s)-$(uname -m).tar.gz
+    wget $(curl -s https://api.github.com/repos/prometheus/node_exporter/releases/latest | grep "browser_download_url.*linux-amd64.tar.gz" | cut -d '"' -f 4)
 
     # Extract the binary and move it to /usr/local/bin
-    tar xvfz node_exporter-$(uname -s)-$(uname -m).tar.gz
-    sudo mv node_exporter*/node_exporter /usr/local/bin/
+    tar xvfz node_exporter-*.tar.gz
+    sudo mv node_exporter-*/node_exporter /usr/local/bin/
+
 
     echo "Configuring Node Exporter..."
     # Create the Node Exporter service file
