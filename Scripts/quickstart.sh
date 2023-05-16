@@ -223,10 +223,11 @@ else
 fi    
 
 #installing golang
-echo "Do you want to install Go? (y/n):" install_go
-read install_go
+echo "Do you want to install Go? (y/n):"
+read $install_go
 
-if [ "$install_go" == "y" ]; then
+if [ "$install_go" == "y" ];
+then
     read -p "Which version of Go do you want to install? [e.g., 1.16.3] :" version
     echo "Installing Go version $version..."
     sudo wget https://golang.org/dl/go$version.linux-amd64.tar.gz
@@ -235,6 +236,9 @@ if [ "$install_go" == "y" ]; then
     rm "go$version.linux-amd64.tar.gz"
     echo "export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin" >> $HOME/.bash_profile
     source ~/.bashrc
+    echo "Go version installed on this machine: $(go version)"
+else 
+    echo "Go installation skipped."
 fi
 
-echo "Go version installed on this machine: $(go version)"
+
