@@ -205,7 +205,7 @@ else
 fi
 
 # Generate google 2FA
-read -p "Do you want to configure google two-factor authentification for created user?: [y/n]" $GFA
+read -p "Do you want to configure google two-factor authentification for created user?: [y/n]" GFA
 
 if [[ "$GFA" =~ ^[Yy]$ ]]
 then
@@ -218,9 +218,9 @@ else
 fi    
 
 #installing golang
-read -p "Do you want to install Go?: [y/n]" $install_go
+read -p "Do you want to install Go?: [y/n]" install_go
 
-if [ "$install_go" =~ ^[Yy]$ ]];
+if [[ "$install_go" =~ ^[Yy]$ ]];
 then
     read -p "Which version of Go do you want to install? [e.g., 1.16.3] :" version
     echo "Installing Go version $version..."
