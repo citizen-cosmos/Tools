@@ -36,8 +36,8 @@ if [[ "$answer" =~ ^[Yy]$ ]]; then
     echo 'auth required pam_google_authenticator.so' >> /etc/pam.d/sshd
     #echo -e "\nPermitRootLogin no \nAllowUsers $USR \nPubkeyAuthentication yes \nPasswordAuthentication no \nChallengeResponseAuthentication yes \nUsePAM yes \nAuthenticationMethods publickey,keyboard-interactive \nX11Forwarding no \nPrintMotd no \nClientAliveInterval 300 \nClientAliveCountMax 2 \nAcceptEnv LANG LC_* \nSubsystem	sftp	/usr/lib/openssh/sftp-server" >> /etc/ssh/sshd_config
     sed -i 's/.*@include common-auth*/#@include common-auth/' /etc/pam.d/sshd
-    sudo systemctl restart ssh
-    sudo systemctl restart sshd
+    sudo systemctl reload ssh
+    sudo systemctl reload sshd
     echo "Citizen Cosmos keys adds successfuly." 
 else
     echo "Citizen Cosmos keys adds was skipped..."
