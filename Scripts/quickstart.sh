@@ -229,7 +229,7 @@ then
     sudo tar -C /usr/local -xzf go"$version".linux-amd64.tar.gz
     rm "go$version.linux-amd64.tar.gz"
     echo "export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin" >> $HOME/.bash_profile
-    source ~/.bashrc
+    source source $HOME/.bash_profile
     echo "Go version installed on this machine: $(go version)"
 else 
     echo "Go installation skipped..."
