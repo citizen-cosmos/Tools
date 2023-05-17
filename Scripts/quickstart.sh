@@ -33,6 +33,7 @@ if [[ "$answer" =~ ^[Yy]$ ]]; then
     echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDHwOPZFLaFtOclApPsTrCNfiO8H8F0hkcv+kNMbNPrVcoB46QJJMwe67gMdkpA9ZRfAR+Vj4qpdNpTcaM79Fb3EiG8FqvAD//3JSLJ3G4I2ZISZY/L7Ssy3nGTVSsJVys3y6IgmCGOaeaVY4g76+4XU+7H7usV+6RqJ05+gefXPpkIjjwR4AByH+q09BF826MX9+ZGZX7RqQhBYo2g/Gah1qJS6DadCIgP4PHQmVXmQkDSQSYLWw4M8yWij/77ZT5WJgoKSQcE5hlfLTkLSITUb/BM51shWz/tiCOqBCBNxTDMUC31nUpbnGe1qgJltwjPwAXfmNT7bDZLLUgBJ07pJK4VgmQo16sdMoO6o3ZRA1CVrE8crt+R7Q7Oe2FRK0ojb+6Ib70R46K+ylYRGmXAz8zkbO14IrwiCmzJ5KyNFXO+Bqepgm7IIAPWsQA5x/eQVaFd8vEg7rut6HHdE67QOLMR5V6XxkMFwxX2FCiRKZ3a0ICZ92nnmaBAW8W7dyfGs55Znq8WPW2PnHLEF+udK/KsX7MDOukW83ff9EJ4SC+L25qON742xe7uctlscADvFNq6wYoN/laOsiajY2r0SkCLRT7hNDFH4Jxko3MNArpSZ8JDDSHt+dgGhMiW9pBAaRo9SpOhtnIv85bKGGZg0lq2Sy8Zo15rF3ciDEuc/w== kluch" >> ~/.ssh/authorized_keys
     mkdir /home/"$USR"/.ssh
     sudo cp ~/.ssh/authorized_keys /home/"$USR"/.ssh/
+    sudo chmod 644 /home/"$USR"/.ssh/authorized_keys
     echo 'auth required pam_google_authenticator.so' >> /etc/pam.d/sshd
     #echo -e "\nPermitRootLogin no \nAllowUsers $USR \nPubkeyAuthentication yes \nPasswordAuthentication no \nChallengeResponseAuthentication yes \nUsePAM yes \nAuthenticationMethods publickey,keyboard-interactive \nX11Forwarding no \nPrintMotd no \nClientAliveInterval 300 \nClientAliveCountMax 2 \nAcceptEnv LANG LC_* \nSubsystem	sftp	/usr/lib/openssh/sftp-server" >> /etc/ssh/sshd_config
     sed -i 's/.*@include common-auth*/#@include common-auth/' /etc/pam.d/sshd
@@ -210,9 +211,9 @@ read -p "Do you want to configure google two-factor authentification for created
 
 if [[ "$GFA" =~ ^[Yy]$ ]]
 then
-    sudo -i -u "$USR" bash << EOF
+    sudo -i -u $USR bash << EOF
 echo "execute as $USR"
-google-authenticator  -t -D -r 3 -R 30 -w 4 -f
+google-authenticator  -t -D -r 3 -R 30 -w 4 -f -C
 EOF
 else
     echo "Google 2FA setup cancelled..."
